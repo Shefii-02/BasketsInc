@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Log;
 trait SendOrderEmail{
 
     public function SendEmailTrait(){
-           $apiKey = '10d2e69fc8359017ebd13a245561754a9bc2bac8';
+           $apiKey = '3c5a4818b7836f1bc2ec21a7ed935231ee754f50';
            $apiEndpoint = 'https://api.sparkpost.com/api/v1/';
            
         $unsentCusEmails = Order::with('basket','orderItems','address')
@@ -66,7 +66,7 @@ trait SendOrderEmail{
                                 ],
                                 'content' => [
                                     'name' => 'MySweetie Pie',
-                                    'from' => 'orders@mysweetiepie.ca',
+                                    'from' => 'orders@basketsinc.indigitalapi.com',
                                     'subject' => "Thank you for Your Order",
                                     'html' => $template,
                                 ],
@@ -120,7 +120,7 @@ trait SendOrderEmail{
             
                         }
                         
-                        if(env('APP_URL') != 'https://www.stage.mysweetiepie.ca'){
+                        if(env('APP_URL') != 'https://basketsinc.indigitalapi.com'){
                             if($store){
                                 if($order_details->basket->order_type == 'delivery') {
                                     $cc_mailId[] = $store->email;    // Default Delivery store mail
@@ -164,26 +164,14 @@ trait SendOrderEmail{
                                 ],
                                 'content' => [
                                     'name' => 'MySweetie Pie',
-                                    'from' => 'orders@mysweetiepie.ca',
+                                    'from' => 'orders@basketsinc.indigitalapi.com',
                                     'subject' => "Received New Order",
                                     'html' => $template,
                                 ],
                                 'recipients' => [
                                     ['address' => ['email' => $all_ordersSend]],
                                 ],
-                                // 'bcc' => [
-                                //     [
-                                // jakki.sweetiepie@gmail.com 	sweetiepieorders@mysweetiepie.ca	tina@mysweetiepie.ca
-                                //         'address' => [
-                                //             'email' => 'shefii.km@gmail.com',
-                                //         ],
-                                //     ],
-                                //     [
-                                //         'address' => [
-                                //             'email' => 'irshad.indigital@gmail.com',
-                                //         ],
-                                //     ],
-                                // ],
+                                
                             ],
                         ]);
                         
@@ -216,7 +204,7 @@ trait SendOrderEmail{
                                         ],
                                         'content' => [
                                             'name' => 'MySweetie Pie',
-                                            'from' => 'orders@mysweetiepie.ca',
+                                            'from' => 'orders@basketsinc.indigitalapi.com',
                                             'subject' => "Received New Order",
                                             'html' => $template,
                                         ],
@@ -236,40 +224,40 @@ trait SendOrderEmail{
                                     ->where('basket_id',$order_details->basket_id)
                                     ->select('items.*','menu_categories.*')
                                     ->get();
-                        if($items->count()>0){
-                            $client = new Client([
-                                    'headers' => [
-                                        'Authorization' => $apiKey,
-                                        'Content-Type' => 'application/json',
-                                    ],
-                                ]);
-                                $response = $client->post($apiEndpoint . 'transmissions', [
-                                    'json' => [
-                                        'options' => [
-                                            'sandbox' => false,
-                                        ],
-                                        'content' => [
-                                            'name' => 'MySweetie Pie',
-                                            'from' => 'orders@mysweetiepie.ca',
-                                            'subject' => "Received New Order",
-                                            'html' => $template,
-                                        ],
-                                        'recipients' => [
-                                            ['address' => ['email' => 'headoffice@mysweetiepie.ca']],
-                                        ],
-                                    ],
-                                ]);
-                                  $responseData = json_decode($response->getBody(), true);
+                        // if($items->count()>0){
+                        //     $client = new Client([
+                        //             'headers' => [
+                        //                 'Authorization' => $apiKey,
+                        //                 'Content-Type' => 'application/json',
+                        //             ],
+                        //         ]);
+                        //         $response = $client->post($apiEndpoint . 'transmissions', [
+                        //             'json' => [
+                        //                 'options' => [
+                        //                     'sandbox' => false,
+                        //                 ],
+                        //                 'content' => [
+                        //                     'name' => 'MySweetie Pie',
+                        //                     'from' => 'orders@basketsinc.indigitalapi.com',
+                        //                     'subject' => "Received New Order",
+                        //                     'html' => $template,
+                        //                 ],
+                        //                 'recipients' => [
+                        //                     ['address' => ['email' => 'headoffice@mysweetiepie.ca']],
+                        //                 ],
+                        //             ],
+                        //         ]);
+                        //           $responseData = json_decode($response->getBody(), true);
     
-                                if (isset($responseData['results']['id'])) {
-                                    $message_id = $responseData['results']['id'];
-                                     \Log::info("Additional Email Message id is  ".$message_id);
-                                     Order::where('id', $order_details->id)->update(['additional_email_id' => $message_id]);
-                                } else {
+                        //         if (isset($responseData['results']['id'])) {
+                        //             $message_id = $responseData['results']['id'];
+                        //              \Log::info("Additional Email Message id is  ".$message_id);
+                        //              Order::where('id', $order_details->id)->update(['additional_email_id' => $message_id]);
+                        //         } else {
                            
-                                    \Log::info("Additional Email Message id is  NULL");
-                                }
-                        }     
+                        //             \Log::info("Additional Email Message id is  NULL");
+                        //         }
+                        // }     
                                     
                       
                     }
