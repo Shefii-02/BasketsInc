@@ -837,8 +837,8 @@ div.sub-checkout a {
     
             const options = {
                 strictBounds: false,
-                // types: ['address'],
-                types: ['(cities)'],
+                types: ['address'],
+                // types: ['(cities)'],
                 componentRestrictions: { country: 'CA' } 
             };
 
