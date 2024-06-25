@@ -100,6 +100,9 @@ function ShippingRulePickupBasedCalender($store_id = null, $type = null, $start_
 
     $cuttoff    = $shipping->cut_off ?? strtotime('6:00 PM');
     $store      = Store::with('store_timing', 'holidaytiming', 'holidaytiming.holiday')->where('status', 1)->where('id', $store_id)->first();
+    if(!$store){
+        $store      = Store::with('store_timing', 'holidaytiming', 'holidaytiming.holiday')->where('status', 1)->first();
+    }
     $preparetime = $shipping->preperation_time * 3600 ?? env('PREPARATION_TIME');
 
     $preSkipDay = intval($preparetime / 86400);
