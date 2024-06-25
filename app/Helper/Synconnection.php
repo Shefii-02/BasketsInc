@@ -53,8 +53,7 @@ use App\Models\Order;
 use App\Models\Theme;
 use App\Models\Nutrition;
 use App\Mail\OrderInvoiceMail;
-use App\Models\EmailConfigration;
-use App\Models\LocationShippingCity;
+use App\Models\ShippingRule;
 
 
 
@@ -659,19 +658,6 @@ function action_activity_getdata($data){
                                }
                               
                            }
-                           LocationShippingCity::where('shipping_id',$newone->id)->delete();
-                           if(count($result->data->cities_name)>0){
-                               foreach($result->data->cities_name as $key => $city){
-                                   $pro_ship               = new LocationShippingCity();
-                                   $pro_ship->province     = $city->province;
-                                   $pro_ship->city_id      = $city->city_id;
-                                   $pro_ship->shipping_id  = $newone->id;
-                                   $pro_ship->charge       = $city->charge;
-                                   $pro_ship->save();
-                               }
-                              
-                           }
-                           
                            CountryShipping::where('shipping_id',$newone->id)->delete();
                            if(count($result->data->country_name)>0){
                                foreach($result->data->country_name as $key2 => $country){
@@ -682,6 +668,24 @@ function action_activity_getdata($data){
                                    $co_ship->save();
                                }
                            }
+                           
+                           ShippingRule::where('shipping_id',$newone->id)->delete();
+                           							
+                            if(count($result->data->rules)>0){
+                               foreach($result->data->rules as $key2 => $rule){
+                                   $rule_ship                   = new ShippingRule();
+                                   $rule_ship->shipping_id      = $newone->id;
+                                   $rule_ship->day              = $rule->day;
+                                   $rule_ship->cutoff           = $rule->cutoff;
+                                   $rule_ship->after_day        = $rule->after_day;
+                                   $rule_ship->after_time       = $rule->after_time;
+                                   $rule_ship->before_day       = $rule->before_day;
+                                   $rule_ship->before_time      = $rule->before_time;
+                                   $rule_ship->status           = $rule->status;
+                                   $rule_ship->save();
+                               }
+                           }
+                           
                        }
                        catch(Exception $e){
                            dd($e->getMessage());
@@ -855,7 +859,8 @@ function action_activity_getdata($data){
                            
                            $category->save();
                            
-                            CategoryProduct::where('category_id',$category->id)->delete();
+                           
+                           CategoryProduct::where('category_id',$category->id)->delete();
                            
                             foreach($result->data->category_products ?? [] as $itmsCate)
                               {
@@ -869,7 +874,6 @@ function action_activity_getdata($data){
                                   }
                                      
                               }
-                              
                        }
                        catch(Exception $e){
                            dd($e);
@@ -916,22 +920,22 @@ function action_activity_getdata($data){
                        $product->cooktime           = $result->data->cooktime;
                        $product->energy             = $result->data->energy;
                        $product->serving            = $result->data->serving;
-                       $product->baking_info        = $result->data->baking_info;
-                       $product->seasonal_availability    = $result->data->seasonal_availability;
-                       $product->seasonal_date_start      = $result->data->seasonal_date_start;
-                       $product->seasonal_date_end        = $result->data->seasonal_date_end;
-                       $product->seasonal_show_start      = $result->data->seasonal_show_start;
-                       $product->seasonal_show_end        = $result->data->seasonal_show_end;
-                       $product->has_customization        = $result->data->has_customization;
+                        $product->baking_info        = $result->data->baking_info;
+                        $product->seasonal_availability    = $result->data->seasonal_availability;
+                        $product->seasonal_date_start      = $result->data->seasonal_date_start;
+                        $product->seasonal_date_end        = $result->data->seasonal_date_end;
+                        $product->seasonal_show_start      = $result->data->seasonal_show_start;
+                        $product->seasonal_show_end        = $result->data->seasonal_show_end;
+                        $product->has_customization        = $result->data->has_customization;
                         $product->customization_color_one = $result->data->customization_color_one;
                         $product->customization_color_two = $result->data->customization_color_two;
-                        
                         
                         $product->has_special_price = $result->data->has_special_price;
                         $product->special_price_from= $result->data->special_price_from;
                         $product->special_price_to  = $result->data->special_price_to;
                         $product->discount_value    = $result->data->discount_value;
                         $product->discount_type     = $result->data->discount_type;
+            
                        
                        try{
                            $product->save();
@@ -997,6 +1001,8 @@ function action_activity_getdata($data){
                                     $product_variation->ingredients     = $itms->ingredients;
                                     $product_variation->in_store        = $result->data->in_store;
                                     $product_variation->online          = $result->data->online;
+                                    $product_variation->special_price   = $itms->special_price;
+                                    
                                     $product_variation->save();
                                     if(count($itms->variationkey)>0){
                                         foreach($itms->variationkey as $vari_key){
@@ -1012,7 +1018,6 @@ function action_activity_getdata($data){
                            }    
                            
                           if(count($result->data->category_products) > 0){
-                          
                               foreach($result->data->category_products as $itms)
                               {
                                   $category_id = Category::where('master_id',$itms->category_id)->pluck('id')->first();
@@ -1022,7 +1027,6 @@ function action_activity_getdata($data){
                                       $category_product->product_id       = $product->id; 
                                       $category_product->save();
                                   }
-                                     
                               }
                           }
                          
@@ -1335,7 +1339,6 @@ function action_activity_getdata($data){
                                     $p_h = new HomepageProductList();
                                     $p_h->homepage_id = $homepage->id;
                                     $p_h->product_id  = $items->product_id;
-                                    $p_h->display_order  = $items->display_order;
                                     $p_h->save();
                                 }
                             }
@@ -1549,21 +1552,6 @@ function action_activity_getdata($data){
                     }
                     $theme->theme_code = $result->data;
                     $theme->save();
-                    
-                }
-                elseif($item->function == 'Email Configration'){
-                    
-                    $config = EmailConfigration::first();
-                    if(!$config){
-                        $config = new EmailConfigration();
-                    }
-                    $config->api_url	    = $result->data->api_url ?? null;
-                    $config->api_key	    = $result->data->api_key ?? null;
-                    $config->api_method	    = $result->data->api_method ?? null;
-                    $config->from_name      = $result->data->from_name ?? null;
-                    $config->from_newsletter_email     = $result->data->from_email ?? null;
-                    $config->from_order_email     = $result->data->from_order_email ?? null;
-                    $config->save();
                     
                 }
                 elseif($item->function == 'Nutrition Explorer'){
